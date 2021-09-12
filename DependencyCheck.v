@@ -3,7 +3,10 @@
 module DependencyCheck
 (
 output [5:0] address,
-input [3:0] data
+output [2:0] Register_Address,
+output [7:0] result,
+input [3:0] data,
+input [7:0] Register
 );
 
   //Register Address
@@ -27,18 +30,24 @@ input [3:0] data
   //Starts from 08 address
 
 reg [5:0] addr;
+reg [2:0] raddr;
 integer flag;
 integer raw, war,waw;
 reg clk;
 reg [3:0] val1,val2,val3;
 reg [3:0] pval1,pval2,pval3;
 reg [3:0] operator;
+reg [7:0] out,op1,op2;
+reg [7:0] res;
 
 assign address = addr;
-
+assign Register_Address = raddr;
+assign result = res;
 initial
 begin
 	addr = 0;
+	raddr = 0;
+	res = 0;
 	flag = 0;
 	clk = 0;
 	pval1 = 8;
@@ -103,7 +112,19 @@ begin
 
 	flag = flag + 1;
 	if(flag == 4)
+	begin
+		raddr = val2; #2 op1 = Register;
+		raddr = val3; #2 op2 = Register;
+		raddr = val1;
+		case(operator)
+			4'b0000 : res = op1 + op2;
+			4'b0001 : res = op1 - op2;
+			4'b0010 : res = op1 * op2;
+			4'b0011 : res = op1 / op2;
+		endcase
+		$display("R%0d = %0d, R%0d = %0d, R%0d = %0d", val1, res, val2, op1, val3, op2);
 		flag=0;
+	end
 
 end
 
